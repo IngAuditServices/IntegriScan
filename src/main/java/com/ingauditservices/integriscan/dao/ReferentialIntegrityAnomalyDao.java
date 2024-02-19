@@ -110,17 +110,20 @@ public class ReferentialIntegrityAnomalyDao {
 		List<DataAnomaly> dataAnomalies = new ArrayList<DataAnomaly>();
 		
 		Statement statement = this.connection.createStatement();
-		ResultSet resultSet = statement.executeQuery(DATA_ANOMALIES_QUERY);
+		boolean hasResultSet = statement.execute(DATA_ANOMALIES_QUERY);
 
-		while (resultSet.next()) {
-			String tableName = resultSet.getString(1);
-			String constraintName = resultSet.getString(2);
-			String anomalyLocation = resultSet.getString(3);
-			DataAnomaly dataAnomaly = new DataAnomaly(tableName, constraintName, anomalyLocation);
-			dataAnomalies.add(dataAnomaly);
+		if(hasResultSet) {
+			ResultSet resultSet = statement.getResultSet();
+			while (resultSet.next()) {
+				String tableName = resultSet.getString(1);
+				String constraintName = resultSet.getString(2);
+				String anomalyLocation = resultSet.getString(3);
+				DataAnomaly dataAnomaly = new DataAnomaly(tableName, constraintName, anomalyLocation);
+				dataAnomalies.add(dataAnomaly);
+			}
+			resultSet.close();
 		}
 		
-		resultSet.close();
 		statement.close();
 
 		return dataAnomalies;
