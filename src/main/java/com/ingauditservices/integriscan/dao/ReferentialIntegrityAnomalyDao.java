@@ -12,8 +12,12 @@ import com.ingauditservices.integriscan.dtos.DisabledCheckConstraintsAnomaly;
 import com.ingauditservices.integriscan.dtos.DisabledTriggerAnomaly;
 import com.ingauditservices.integriscan.dtos.FakeForeignKeyAnomaly;
 import com.ingauditservices.integriscan.dtos.IsolatedTableAnomaly;
+import com.ingauditservices.integriscan.sql.SqlServerConnection;
+import com.ingauditservices.integriscan.sql.exceptions.ConnectionInitializationException;
 
 public class ReferentialIntegrityAnomalyDao {
+	private static ReferentialIntegrityAnomalyDao instance;
+	
 	private final String DATA_ANOMALIES_QUERY = """
 			DBCC CHECKCONSTRAINTS WITH ALL_CONSTRAINTS;
 			""";
@@ -85,9 +89,18 @@ public class ReferentialIntegrityAnomalyDao {
 
 	private Connection connection;
 
-	public ReferentialIntegrityAnomalyDao(Connection connection) {
-		this.connection = connection;
+	private ReferentialIntegrityAnomalyDao() throws ConnectionInitializationException {
+		this.connection = SqlServerConnection.getInstance().getConnection();
 	}
+	
+	public static ReferentialIntegrityAnomalyDao getInstance() throws ConnectionInitializationException {
+		if (instance == null)
+		{
+			instance = new ReferentialIntegrityAnomalyDao();
+		}
+		return instance;
+	}
+	
 
 	public void setConnection(Connection connection) {
 		this.connection = connection;
